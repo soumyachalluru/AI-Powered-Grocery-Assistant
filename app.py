@@ -39,3 +39,12 @@ def predict_item(image_path, output_folder):
         rest = line[quantity_end_index+1:].strip()
 
         return product_name, quantity, rest
+    file_path = labels_filename
+
+    with open(file_path, 'r') as file:
+        for line in file:
+            product_name, quantity, rest = split_text_line(line)
+            print("Product Name:", product_name)
+            print("Quantity:", quantity)
+            print("The Rest:", rest) 
+            return product_name, quantity
