@@ -48,3 +48,51 @@ def predict_item(image_path, output_folder):
             print("Quantity:", quantity)
             print("The Rest:", rest) 
             return product_name, quantity
+        
+
+def main():
+    st.set_page_config(page_title="BrailleCart",
+                   page_icon = '👓👓',
+                   layout = 'centered',
+                   initial_sidebar_state = 'collapsed')
+    st.title("BrailleCart")
+
+    st.image('/braillecart.webp')
+
+    st.markdown('''<div style="text-align: justify;">
+                    See the Unseen: Empowering vision, Enhancing individual lives with AI.
+                </div>''', unsafe_allow_html=True)
+
+    uploaded_image = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
+
+    if uploaded_image is not None:
+        image_path = os.path.join("temp", uploaded_image.name)
+        os.makedirs("temp", exist_ok=True)
+        with open(image_path, "wb") as f:
+            f.write(uploaded_image.getbuffer())
+
+        # Load the image using PIL to display (optional)
+        image = Image.open(uploaded_image)
+        st.image(image, caption="Uploaded Image", width=500)
+
+        output_folder = 'output'
+
+        if st.button('Predict'):
+            with st.spinner('Predicting...'):
+                predicted_class, predicted_quantity = predict_item(image_path, output_folder)
+                st.success(f"YOLO Prediction: {predicted_class}")
+                # Apply OCR
+                ocr_text = apply_easyocr(image_path, output_folder)
+                st.success(f"OCR Prediction: {ocr_text}")
+                print(ocr_text)
+                if predicted_class:
+                    response = generate_detailed_description(predicted_class, predicted_quantity)
+                    st.success(f"Meta Llama 3.2 Response: {response}")
+                    convert_to_speech(response)
+                else:
+                    response = generate_detailed_description_ocr(ocr_text)
+                    st.success(f"Meta Llama 3.2 Response: {response}")
+                    convert_to_speech(response)
+
+            if os.path.exists("temp"):
+                shutil.rmtree("temp")
