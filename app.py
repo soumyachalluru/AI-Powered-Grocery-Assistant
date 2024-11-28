@@ -1,3 +1,17 @@
+import streamlit as st
+from PIL import Image
+from ultralytics import YOLO
+import os
+from pathlib import Path
+from gtts import gTTS
+import random
+import shutil
+from transformers import AutoTokenizer, AutoModelForCausalLM
+import easyocr
+
+# Load the model
+model = YOLO('/runs/detect/train/weights/best.pt')
+
 def predict_item(image_path, output_folder):
     os.makedirs(output_folder, exist_ok=True)
 
@@ -48,7 +62,25 @@ def predict_item(image_path, output_folder):
             print("Quantity:", quantity)
             print("The Rest:", rest) 
             return product_name, quantity
-        
+
+# Function to Apply OCR
+def apply_easyocr(image_path, output_folder):
+    os.makedirs(output_folder, exist_ok=True)
+
+    # Initialize EasyOCR Reader (Supports multiple languages)
+    reader = easyocr.Reader(['en'], gpu=False)
+
+    # Perform OCR
+    result = reader.readtext(image_path, detail=0)
+    ocr_text = "\n".join(result)
+
+    # Save OCR text
+    filename = Path(image_path).stem
+    ocr_filename = f"{output_folder}/{filename}_ocr.txt"
+    with open(ocr_filename, "w") as f:
+        f.write(ocr_text)
+
+    return ocr_text
 
 def main():
     st.set_page_config(page_title="BrailleCart",
