@@ -45,6 +45,35 @@ def generate_detailed_description(predicted_class, predicted_quantity):
     # Remove repeated prompt text if generated
     detailed_descriptions = detailed_descriptions.replace(prompt, "").strip()
     
+    return detailed_descriptions
+
+def generate_detailed_description_ocr(predicted_class):
+    
+    # Construct a prompt for the LLM
+    detected_items = f"The detected product is a {predicted_class}."
+    instruction = (
+    "You are speaking to a visually impaired person. "
+    "Please describe the product they are holding in a clear, simple, and helpful tone. "
+    "Start by stating the product name, followed by a brief description of its purpose and key features. "
+    "Avoid technical terms and make the explanation easy to understand."
+    )
+
+    prompt = (
+        f"Below are the product details detected by the system:\n"
+        f"{detected_items}\n"
+        f"{instruction}\n"
+    )
+
+    # Tokenize the input prompt
+    inputs = tokenizer(prompt, return_tensors="pt")
+
+    # Generate text using the model
+    outputs = llm.generate(**inputs, max_length=200, num_return_sequences=1)
+    detailed_descriptions = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    
+    # Remove repeated prompt text if generated
+    detailed_descriptions = detailed_descriptions.replace(prompt, "").strip()
+    
     
     return detailed_descriptions
 
