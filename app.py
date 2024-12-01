@@ -193,3 +193,11 @@ def main():
 
             if os.path.exists("temp"):
                 shutil.rmtree("temp")
+
+def convert_to_speech(text):
+    tts = gTTS(text,lang='en')
+    tts.save('output.mp3')
+    st.audio("output.mp3", format="audio/mp3")        
+
+if __name__ == "__main__":
+    main()
